@@ -2,64 +2,71 @@ const Cart = require("../Cart/CartSchema");
 
 //  add  item to cart
 exports.addToCart = async (req, res) => {
-  const { productId, userId, price, quantity } = req.body;
+  const { productId, userId, totalPrice, quantity } = req.body;
 
   try {
-    let cartItem = await Cart.findOne({ productId, userId });
-
-    if (cartItem) {
-      // Update quantity if the item already exists
-      cartItem.quantity += quantity;
-      // cartItem.quantity = cartItem.quantity + quantity;
-      // cartItem.quantity = 2 + 3;
+    const existingCartItem = await Cart.aggregate([
+      {
+        $match: { productId: productId, userId: userId },
+      },
+    ]);
+    if (existingCartItem.length > 0) {
+      const updateItems = await Cart.findByIdAndUpdate(
+        { productId: productId, userId: userId },
+        { $inc: { quantity: quantity } },
+        { new: true }
+      );
+      console.log(updateItems);
+      return res.status(200).json(updateItems);
     } else {
-      // Add new item to cart
-      cartItem = new Cart({ productId, userId, price, quantity });
+      // If it does not exist, create a new cart item
+      const newCartItem = new Cart({ productId, userId, totalPrice, quantity });
+      console.log(newCartItem);
+      await newCartItem.save();
+      return res.status(201).json(newCartItem);
     }
-
-    await cartItem.save();
-    console.log(cartItem);
-    res.status(200).json(cartItem);
   } catch (error) {
-    res.status(500).json({ error: "Failed to add  cart" });
+    res.status(400).json({ error: error.message });
   }
 };
 
 //  get cart items
-
 exports.getItems = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate("productId");
+    console.log(cart);
     if (!cart) {
       return res.status(404).send({ message: "Cart not found" });
     }
+    
     res.status(200).send(cart);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "Internal server error" });
+    res.status(400).json({ error: error.message });
   }
 };
 
 exports.deleteItems = async (req, res) => {
-  const { userId } = req.params.id;
+  const { userId } = req.params;
+  console.log(userId);
 
   try {
-    await Cart.findByIdAndDelete({ userId });
+    await Cart.findOneAndDelete({ userId });
     res.status(200).json({ message: "Item removed from cart" });
   } catch (error) {
-    res.status(500).json({ error: "Failed to remove item from cart" });
+    res.status(400).json({ error: error.message });
   }
 };
 
 //  update  cart items
 exports.updateItems = async (req, res) => {
   const { productId, userId, price, quantity } = req.body;
-
+  const {id}= req.params
   try {
     const updatedCart = await Cart.findByIdAndUpdate(
-      req.params.id,
+ id,
       {
         $set: {
           ...(productId && { productId }),
@@ -70,7 +77,7 @@ exports.updateItems = async (req, res) => {
       },
       { new: true }
     );
-       console.log(updatedCart);
+    console.log(updatedCart);
     res.status(200).json(updatedCart);
   } catch (error) {
     res.status(500).json({ error: "Failed to update cart" });

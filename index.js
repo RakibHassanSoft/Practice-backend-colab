@@ -1,14 +1,16 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const connectDB = require("./Config/dbConfig");
-const userRoute = require('./User/UserRoute');
-connectDB()
+const UserRoute = require("./User/UserRoute");
+const ProductRoute = require("./products/ProductRoute");
+const CartRoute = require("./Cart/CartRoute");
+connectDB();
 const app = express();
 require("dotenv").config();
 
 // Middleware
 app.use(express.json());
-app.use(cookieParser());
+// app.use(cookieParser());
 
 // Home route
 app.get("/", (req, res) => {
@@ -16,7 +18,12 @@ app.get("/", (req, res) => {
 });
 
 //Routes
-app.use('/api/users',userRoute);
+app.use("/api/users", UserRoute);
+app.use("/api/products", ProductRoute);
+app.use("/api/cart", CartRoute);
+
+
+
 // Server listening
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
