@@ -1,23 +1,31 @@
 const express = require("express");
-
-
-
-
+// const cookieParser = require("cookie-parser");
+const connectDB = require("./Config/dbConfig");
+const UserRoute = require("./User/UserRoute");
+const ProductRoute = require("./products/ProductRoute");
+const CartRoute = require("./Cart/CartRoute");
+const PaymentRoute = require("./Payments/PaymentsRoute");
+connectDB();
 const app = express();
 require("dotenv").config();
-const cookieParser=require("cookie-parser");
-// middleware
+
+// Middleware
 app.use(express.json());
-app.use(cookieParser());
+// app.use(cookieParser());
 
-//  routes
-// app.use("/api/users", UserRoute);
-
-//Home
+// Home route
 app.get("/", (req, res) => {
-  res.send("hello from library ");
+  res.send("hello Developer");
 });
 
+//Routes
+app.use("/api/users", UserRoute);
+app.use("/api/products", ProductRoute);
+app.use("/api/cart", CartRoute);
+app.use('/api/payments', PaymentRoute) 
+
+
+// Server listening
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
