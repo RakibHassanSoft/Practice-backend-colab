@@ -1,7 +1,7 @@
  const User=require('../User/userSchema')
 
 
-const User = require('../models/User');
+
 
 // Middleware to check if the user is an admin
 const isAdmin = async (req, res, next) => {
