@@ -4,6 +4,7 @@ const connectDB = require("./Config/dbConfig");
 const UserRoute = require("./User/UserRoute");
 const ProductRoute = require("./products/ProductRoute");
 const CartRoute = require("./Cart/CartRoute");
+const PaymentRoute = require("./Payments/PaymentsRoute");
 const SSlRoute= require('./SSlComarz/SSlRoute')
 connectDB();
 const app = express();
@@ -22,7 +23,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", UserRoute);
 app.use("/api/products", ProductRoute);
 app.use("/api/cart", CartRoute);
-app.use('/api/payment', SSlRoute);
+app.use('/api/payments', PaymentRoute) app.use('/api/payment', SSlRoute);
 
 
 
